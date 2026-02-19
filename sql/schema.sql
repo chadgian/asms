@@ -92,9 +92,41 @@ CREATE TABLE problem_reports (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 INSERT INTO users (name, username, password_hash, role) VALUES
-('System Admin', 'admin', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'admin'),
-('Agency A', 'agency_a', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'agency'),
-('Agency B', 'agency_b', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'agency');
+('System Admin', 'admin', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'admin');
 
+-- Region VI sample government agencies (username = agency identifier, password = password123)
+INSERT INTO users (name, username, password_hash, role, province, sector) VALUES
+('Provincial Government of Aklan', 'pgo_aklan', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'agency', 'Aklan', 'LGU'),
+('Aklan State University', 'aklan_state_university', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'agency', 'Aklan', 'SUC/LUC'),
+('DSWD Field Office VI - Aklan', 'dswd_fo6_aklan', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'agency', 'Aklan', 'NGA'),
+
+('Provincial Government of Antique', 'pgo_antique', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'agency', 'Antique', 'LGU'),
+('University of Antique', 'university_of_antique', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'agency', 'Antique', 'SUC/LUC'),
+('DOH CHD Western Visayas - Antique', 'doh_chd6_antique', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'agency', 'Antique', 'NGA'),
+
+('Provincial Government of Capiz', 'pgo_capiz', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'agency', 'Capiz', 'LGU'),
+('Capiz State University', 'capiz_state_university', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'agency', 'Capiz', 'SUC/LUC'),
+('PhilHealth Capiz', 'philhealth_capiz', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'agency', 'Capiz', 'GOCC'),
+
+('Provincial Government of Guimaras', 'pgo_guimaras', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'agency', 'Guimaras', 'LGU'),
+('Guimaras State University', 'guimaras_state_university', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'agency', 'Guimaras', 'SUC/LUC'),
+('NIA Guimaras', 'nia_guimaras', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'agency', 'Guimaras', 'NGA'),
+
+('Provincial Government of Iloilo', 'pgo_iloilo', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'agency', 'Iloilo', 'LGU'),
+('West Visayas State University', 'west_visayas_state_university', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'agency', 'Iloilo', 'SUC/LUC'),
+('DOLE Region VI', 'dole_region6', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'agency', 'Iloilo', 'NGA'),
+('LandBank Iloilo', 'landbank_iloilo', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'agency', 'Iloilo', 'GOCC'),
+
+('Provincial Government of Negros Occidental', 'pgo_negocc', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'agency', 'Negros Occidental', 'LGU'),
+('Central Philippines State University', 'cpsu_negocc', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'agency', 'Negros Occidental', 'SUC/LUC'),
+('Sugar Regulatory Administration', 'sra_negocc', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'agency', 'Negros Occidental', 'GOCC'),
+('DPWH Negros Occidental 1st DEO', 'dpwh_negocc_1deo', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'agency', 'Negros Occidental', 'NGA');
+
+-- Viewer accounts per province
 INSERT INTO users (name, username, password_hash, role, province) VALUES
-('Viewer Aklan', 'viewer_aklan', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'viewer', 'Aklan');
+('Viewer Aklan', 'viewer_aklan', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'viewer', 'Aklan'),
+('Viewer Antique', 'viewer_antique', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'viewer', 'Antique'),
+('Viewer Capiz', 'viewer_capiz', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'viewer', 'Capiz'),
+('Viewer Guimaras', 'viewer_guimaras', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'viewer', 'Guimaras'),
+('Viewer Iloilo', 'viewer_iloilo', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'viewer', 'Iloilo'),
+('Viewer Negros Occidental', 'viewer_negocc', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'viewer', 'Negros Occidental');

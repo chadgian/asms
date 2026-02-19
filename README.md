@@ -15,6 +15,7 @@ Modern PHP + MySQL management system for Admin, Agency, and Viewer users.
 - Agency document batches are grouped and shown in reverse chronological order with timestamp headings.
 - Document status update now uses modal with larger remarks area.
 - Viewer header simplified to Dashboard + Logout.
+- Added Statistics page (Admin and Viewer) showing per-province completion % and counts.
 - Realtime as-you-type search in major lists/tables.
 - Buttons and action labels standardized for clarity (Download for downloadable items).
 
@@ -39,3 +40,9 @@ Password for all: `password123`
 - `agency_a`
 - `agency_b`
 - `viewer_aklan` (viewer scoped to Aklan)
+
+
+## Seed Data
+- Added Region VI (Western Visayas) sample government agencies with province + sector tags.
+- Agency usernames use agency identifiers and default password `password123`.
+- Added one viewer account per province (`viewer_aklan`, `viewer_antique`, `viewer_capiz`, `viewer_guimaras`, `viewer_iloilo`, `viewer_negocc`).
