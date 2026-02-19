@@ -1,68 +1,39 @@
 # Agency Submission Management System (ASMS)
 
-A PHP + MySQL system for managing document submissions with three roles:
-- **Admin**
-- **Agency**
-- **Viewer (read-only)**
+Modern PHP + MySQL management system for Admin, Agency, and Viewer users.
 
-## Features
-- Username/password login
-- Agency dashboard grouped into:
-  - Not Yet Submitted
-  - Already Submitted
-- Agency upload with remarks
-- Admin submission creation/editing with optional file template
-- Admin agency review with statuses:
-  - Not Yet Submitted
-  - For Review
-  - For Compliance
-  - Approved
-- Notification updates to agencies
-- Problem reporting page
-- Local document storage in `/uploads`
+## Highlights
+- Root entrypoint is now `index.php` (easy navigation on XAMPP/InfinityFree).
+- Modern animated UI with improved spacing/padding and smooth transitions.
+- Username login (not email).
+- Admin notifications for newly uploaded agency documents.
+- Admin can add agency/viewer accounts with province and sector metadata.
+- Viewer dashboards are province-scoped and read-only.
+- Agency documents table shows document status and download actions.
 
-## Required Stack
-- PHP 8.x (XAMPP PHP is fine)
-- MySQL / MariaDB (XAMPP phpMyAdmin is fine)
+## XAMPP Setup
+1. Copy this project to `C:\xampp\htdocs\asms`.
+2. Start Apache + MySQL in XAMPP.
+3. Create a database in phpMyAdmin.
+4. Import `sql/schema.sql`.
+5. Update DB values in `config/config.php` if needed.
+6. Open `http://localhost/asms/`.
 
-## Local Setup (XAMPP)
-1. Copy project folder to:
-   - `C:\xampp\htdocs\asms`
-2. Start **Apache** and **MySQL** in XAMPP Control Panel.
-3. Open phpMyAdmin and create a database (example: `asms`).
-4. Select the database, then import `sql/schema.sql`.
-5. Update DB settings in `config/config.php` if needed.
-6. Open app:
-   - `http://localhost/asms/public`
+## InfinityFree Setup
+1. Create a MySQL database in InfinityFree panel.
+2. Import `sql/schema.sql` through phpMyAdmin.
+3. Upload all project files to `htdocs`.
+4. Set DB credentials in `config/config.php`.
+5. Ensure `uploads/` is writable.
 
 ## Default Accounts
-Password for all accounts: `password123`
-- Admin: `admin`
-- Agency A: `agency_a`
-- Agency B: `agency_b`
-- Viewer: `viewer`
+Password for all: `password123`
+- `admin` (admin)
+- `agency_a` (agency)
+- `agency_b` (agency)
+- `viewer_aklan` (viewer, scoped to Aklan)
 
-## If You Encounter Import Errors
-- Use a **new empty database** before importing.
-- `schema.sql` already drops/recreates tables to avoid duplicate-column issues.
-- The previous error `#1060 Duplicate column name 'admin'` is resolved by using a clean users table definition and full table recreation in this schema.
-
-## InfinityFree Deployment Guide
-InfinityFree does not support Node/Vercel-style deployment. Deploy as standard PHP hosting.
-
-1. In InfinityFree control panel, create your MySQL database.
-2. Get DB credentials (DB host, DB name, DB user, DB password).
-3. Import `sql/schema.sql` in InfinityFree phpMyAdmin.
-4. Upload project files via File Manager or FTP to your domain directory (`htdocs`).
-5. Update `config/config.php` values:
-   - `DB_HOST`
-   - `DB_PORT` (usually `3306`)
-   - `DB_NAME`
-   - `DB_USER`
-   - `DB_PASS`
-6. Ensure `uploads/` is writable.
-7. Open your site URL and login.
-
-## Notes for InfinityFree
-- Shared hosting may restrict some PHP settings and filesystem operations.
-- Local-file uploads can work, but for scale you may move files to cloud storage later.
+## Schema Notes
+- `schema.sql` drops/recreates tables to avoid duplicate-column errors.
+- Uses `province` and `sector` fields for agencies/viewers.
+- Uses `file_template_name` so template download keeps the original filename.

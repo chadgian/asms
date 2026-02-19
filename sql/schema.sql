@@ -1,6 +1,4 @@
 -- ASMS schema for phpMyAdmin / XAMPP / InfinityFree
--- Import this file into your selected database (do NOT include CREATE DATABASE for shared hosting compatibility)
-
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
 
@@ -15,10 +13,12 @@ SET FOREIGN_KEY_CHECKS = 1;
 
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(150) NOT NULL,
+    name VARCHAR(180) NOT NULL,
     username VARCHAR(100) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     role ENUM('admin','agency','viewer') NOT NULL,
+    province ENUM('Aklan','Antique','Capiz','Guimaras','Iloilo','Negros Occidental') NULL,
+    sector ENUM('NGA','LGU','GOCC','SUC/LUC') NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -28,6 +28,7 @@ CREATE TABLE submissions (
     deadline DATETIME NOT NULL,
     details TEXT NULL,
     file_template_path VARCHAR(255) NULL,
+    file_template_name VARCHAR(255) NULL,
     created_by INT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -59,12 +60,13 @@ CREATE TABLE uploaded_documents (
 
 CREATE TABLE notifications (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    agency_id INT NOT NULL,
-    agency_submission_id INT NOT NULL,
+    recipient_user_id INT NOT NULL,
+    agency_submission_id INT NULL,
     message TEXT NOT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_notif_agency FOREIGN KEY (agency_id) REFERENCES users(id) ON DELETE CASCADE,
-    CONSTRAINT fk_notif_as FOREIGN KEY (agency_submission_id) REFERENCES agency_submissions(id) ON DELETE CASCADE
+    is_read TINYINT(1) NOT NULL DEFAULT 0,
+    CONSTRAINT fk_notif_user FOREIGN KEY (recipient_user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_notif_as FOREIGN KEY (agency_submission_id) REFERENCES agency_submissions(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE problem_reports (
@@ -77,12 +79,10 @@ CREATE TABLE problem_reports (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Default accounts (password: password123)
--- admin / password123
--- agency_a / password123
--- agency_b / password123
--- viewer / password123
 INSERT INTO users (name, username, password_hash, role) VALUES
 ('System Admin', 'admin', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'admin'),
 ('Agency A', 'agency_a', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'agency'),
-('Agency B', 'agency_b', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'agency'),
-('Read Only Viewer', 'viewer', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'viewer');
+('Agency B', 'agency_b', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'agency');
+
+INSERT INTO users (name, username, password_hash, role, province) VALUES
+('Viewer Aklan', 'viewer_aklan', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'viewer', 'Aklan');
