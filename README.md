@@ -3,17 +3,20 @@
 Modern PHP + MySQL management system for Admin, Agency, and Viewer users.
 
 ## Latest Updates
-- Submission form now supports **multiple file templates** upload.
-- Deadline input is now **date-only**.
-- Scope agency selection now uses a **searchable modal** with improved checkbox alignment.
-- Search in tables/lists is now **realtime as you type** (no page reload).
-- Admin submission list now shows per-submission **View** and **Edit** actions with updated button color scheme:
-  - View = dark
-  - Edit = light
-- Admin submission dashboard now first shows agencies only, with **View** per agency to inspect grouped uploaded batches.
-- Admin can update **document status per file**; statuses are tracked individually.
-- Agency uploads are grouped by upload batch token and each document has its own status.
-- Notifications include the submission name and are searchable.
+- Redesigned submission pages so submission title/details are visually distinct from agency lists.
+- Admin submission form improvements:
+  - multiple template file upload
+  - date-only deadline
+  - auto-open agency modal when scope = selected
+  - line-by-line alphabetical agency list with aligned checkboxes
+  - selected-agency preview + "Edit Selected Agency" button
+- Accounts editing now uses modal (no full-page reload when opening edit).
+- Submission dashboard now lists agencies first, with per-agency view.
+- Agency document batches are grouped and shown in reverse chronological order with timestamp headings.
+- Document status update now uses modal with larger remarks area.
+- Viewer header simplified to Dashboard + Logout.
+- Realtime as-you-type search in major lists/tables.
+- Buttons and action labels standardized for clarity (Download for downloadable items).
 
 ## XAMPP Setup
 1. Copy project to `C:\xampp\htdocs\asms`.
@@ -36,8 +39,3 @@ Password for all: `password123`
 - `agency_a`
 - `agency_b`
 - `viewer_aklan` (viewer scoped to Aklan)
-
-## Schema Notes
-- Schema recreates all tables for clean imports.
-- `submission_templates` stores multiple templates per submission.
-- `uploaded_documents` stores per-document status, batch token, uploader metadata, and admin remarks.
