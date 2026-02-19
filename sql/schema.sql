@@ -4,7 +4,7 @@ USE asms;
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(150) NOT NULL,
-    email VARCHAR(150) NOT NULL UNIQUE,
+    username VARCHAR(100) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     role ENUM('admin', 'agency', 'viewer') NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -65,26 +65,31 @@ CREATE TABLE IF NOT EXISTS problem_reports (
 );
 
 -- Default users (password: password123)
-INSERT INTO users (name, email, password_hash, role)
+-- username/password:
+-- admin / password123
+-- agency_a / password123
+-- agency_b / password123
+-- viewer / password123
+INSERT INTO users (name, username, password_hash, role)
 SELECT * FROM (
-    SELECT 'System Admin', 'admin@asms.local', '$2y$10$wgG4QOH5Yb4ZxqjbvsYtAuc8MQfR2rM7NQYfUPP8KNw5iyIG8Wxri', 'admin'
+    SELECT 'System Admin', 'admin', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'admin'
 ) AS tmp
-WHERE NOT EXISTS (SELECT 1 FROM users WHERE email = 'admin@asms.local') LIMIT 1;
+WHERE NOT EXISTS (SELECT 1 FROM users WHERE username = 'admin') LIMIT 1;
 
-INSERT INTO users (name, email, password_hash, role)
+INSERT INTO users (name, username, password_hash, role)
 SELECT * FROM (
-    SELECT 'Agency A', 'agencya@asms.local', '$2y$10$wgG4QOH5Yb4ZxqjbvsYtAuc8MQfR2rM7NQYfUPP8KNw5iyIG8Wxri', 'agency'
+    SELECT 'Agency A', 'agency_a', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'agency'
 ) AS tmp
-WHERE NOT EXISTS (SELECT 1 FROM users WHERE email = 'agencya@asms.local') LIMIT 1;
+WHERE NOT EXISTS (SELECT 1 FROM users WHERE username = 'agency_a') LIMIT 1;
 
-INSERT INTO users (name, email, password_hash, role)
+INSERT INTO users (name, username, password_hash, role)
 SELECT * FROM (
-    SELECT 'Agency B', 'agencyb@asms.local', '$2y$10$wgG4QOH5Yb4ZxqjbvsYtAuc8MQfR2rM7NQYfUPP8KNw5iyIG8Wxri', 'agency'
+    SELECT 'Agency B', 'agency_b', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'agency'
 ) AS tmp
-WHERE NOT EXISTS (SELECT 1 FROM users WHERE email = 'agencyb@asms.local') LIMIT 1;
+WHERE NOT EXISTS (SELECT 1 FROM users WHERE username = 'agency_b') LIMIT 1;
 
-INSERT INTO users (name, email, password_hash, role)
+INSERT INTO users (name, username, password_hash, role)
 SELECT * FROM (
-    SELECT 'Read Only Viewer', 'viewer@asms.local', '$2y$10$wgG4QOH5Yb4ZxqjbvsYtAuc8MQfR2rM7NQYfUPP8KNw5iyIG8Wxri', 'viewer'
+    SELECT 'Read Only Viewer', 'viewer', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'viewer'
 ) AS tmp
-WHERE NOT EXISTS (SELECT 1 FROM users WHERE email = 'viewer@asms.local') LIMIT 1;
+WHERE NOT EXISTS (SELECT 1 FROM users WHERE username = 'viewer') LIMIT 1;

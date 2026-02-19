@@ -28,12 +28,16 @@ php -S 0.0.0.0:8000 -t public
 
 ## Default Seed Users
 
-From `sql/schema.sql`:
+From `sql/schema.sql` (all passwords are `password123`):
 
-- Admin: `admin@asms.local` / `password123`
-- Agency A: `agencya@asms.local` / `password123`
-- Agency B: `agencyb@asms.local` / `password123`
-- Viewer: `viewer@asms.local` / `password123`
+- Admin: `admin`
+- Agency A: `agency_a`
+- Agency B: `agency_b`
+- Viewer: `viewer`
+
+## Important Note (If Login Fails)
+
+If you imported an older schema using `email` accounts, refresh the `users` table by re-running `sql/schema.sql` on a clean database or updating your schema/data to match the new `username`-based login.
 
 ## Key Rules Implemented
 
@@ -44,3 +48,48 @@ From `sql/schema.sql`:
   - bottom: already submitted
 - Admin can target all agencies or selected agencies.
 
+## Deploying on Vercel (PHP + MySQL)
+
+> Vercel can run PHP through a serverless runtime setup. For production, ensure your MySQL database is publicly reachable or via a secure hosted provider.
+
+1. Install Vercel CLI and login:
+
+```bash
+npm i -g vercel
+vercel login
+```
+
+2. Add a `vercel.json` in project root:
+
+```json
+{
+  "version": 2,
+  "builds": [
+    { "src": "public/index.php", "use": "vercel-php@0.7.3" }
+  ],
+  "routes": [
+    { "src": "/(.*)", "dest": "/public/index.php" }
+  ]
+}
+```
+
+3. Set production environment variables in Vercel Dashboard (or CLI), then map them in `config/config.php` (recommended enhancement):
+   - `DB_HOST`
+   - `DB_PORT`
+   - `DB_NAME`
+   - `DB_USER`
+   - `DB_PASS`
+
+4. Deploy:
+
+```bash
+vercel
+```
+
+5. For production deployment:
+
+```bash
+vercel --prod
+```
+
+6. After deploy, import `sql/schema.sql` to your production MySQL database and verify `uploads/` strategy (local ephemeral storage is not ideal for serverless; consider external object storage for long-term file persistence).

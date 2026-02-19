@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-const DB_HOST = '127.0.0.1';
-const DB_PORT = '3306';
-const DB_NAME = 'asms';
-const DB_USER = 'root';
-const DB_PASS = '';
+define('DB_HOST', getenv('DB_HOST') ?: '127.0.0.1');
+define('DB_PORT', getenv('DB_PORT') ?: '3306');
+define('DB_NAME', getenv('DB_NAME') ?: 'asms');
+define('DB_USER', getenv('DB_USER') ?: 'root');
+define('DB_PASS', getenv('DB_PASS') ?: '');
 
-const APP_NAME = 'Agency Submission Management System';
-const BASE_URL = '/';
-const UPLOAD_DIR = __DIR__ . '/../uploads';
+define('APP_NAME', 'Agency Submission Management System');
+define('BASE_URL', '/');
+define('UPLOAD_DIR', __DIR__ . '/../uploads');
 
 if (!is_dir(UPLOAD_DIR)) {
     mkdir(UPLOAD_DIR, 0775, true);

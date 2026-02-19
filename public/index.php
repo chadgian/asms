@@ -61,9 +61,9 @@ if ($page === 'logout') {
 
 if ($page === 'login') {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $email = trim($_POST['email'] ?? '');
+        $username = trim($_POST['username'] ?? '');
         $password = (string) ($_POST['password'] ?? '');
-        if (attempt_login($email, $password)) {
+        if (attempt_login($username, $password)) {
             header('Location: index.php');
             exit;
         }
@@ -77,8 +77,8 @@ if ($page === 'login') {
     <div class="card" style="max-width: 420px; margin: 40px auto;">
         <h2>Login</h2>
         <form method="post">
-            <label>Email</label>
-            <input type="email" name="email" required>
+            <label>Username</label>
+            <input type="text" name="username" required>
             <label>Password</label>
             <input type="password" name="password" required>
             <button type="submit">Sign In</button>

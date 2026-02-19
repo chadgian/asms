@@ -32,10 +32,10 @@ function require_role(array $roles): void
     }
 }
 
-function attempt_login(string $email, string $password): bool
+function attempt_login(string $username, string $password): bool
 {
-    $stmt = db()->prepare('SELECT * FROM users WHERE email = :email LIMIT 1');
-    $stmt->execute(['email' => $email]);
+    $stmt = db()->prepare('SELECT * FROM users WHERE username = :username LIMIT 1');
+    $stmt->execute(['username' => $username]);
     $user = $stmt->fetch();
 
     if (!$user || !password_verify($password, $user['password_hash'])) {
@@ -45,7 +45,7 @@ function attempt_login(string $email, string $password): bool
     $_SESSION['user'] = [
         'id' => (int) $user['id'],
         'name' => $user['name'],
-        'email' => $user['email'],
+        'username' => $user['username'],
         'role' => $user['role'],
     ];
 
