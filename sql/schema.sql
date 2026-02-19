@@ -1,10 +1,10 @@
--- ASMS schema for phpMyAdmin / XAMPP / InfinityFree
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
 
 SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS notifications;
 DROP TABLE IF EXISTS uploaded_documents;
+DROP TABLE IF EXISTS submission_templates;
 DROP TABLE IF EXISTS agency_submissions;
 DROP TABLE IF EXISTS problem_reports;
 DROP TABLE IF EXISTS submissions;
@@ -25,23 +25,29 @@ CREATE TABLE users (
 CREATE TABLE submissions (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    deadline DATETIME NOT NULL,
+    deadline DATE NOT NULL,
     details TEXT NULL,
-    file_template_path VARCHAR(255) NULL,
-    file_template_name VARCHAR(255) NULL,
     created_by INT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_submission_creator FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE submission_templates (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    submission_id INT NOT NULL,
+    file_name VARCHAR(255) NOT NULL,
+    file_path VARCHAR(255) NOT NULL,
+    uploaded_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_tpl_submission FOREIGN KEY (submission_id) REFERENCES submissions(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE agency_submissions (
     id INT AUTO_INCREMENT PRIMARY KEY,
     submission_id INT NOT NULL,
     agency_id INT NOT NULL,
-    status ENUM('not_submitted','for_review','approved','for_compliance') NOT NULL DEFAULT 'not_submitted',
+    latest_status ENUM('not_submitted','for_review','approved','for_compliance') NOT NULL DEFAULT 'not_submitted',
     submitted_at DATETIME NULL,
-    admin_remarks TEXT NULL,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY uniq_submission_agency (submission_id, agency_id),
     CONSTRAINT fk_as_submission FOREIGN KEY (submission_id) REFERENCES submissions(id) ON DELETE CASCADE,
@@ -53,10 +59,14 @@ CREATE TABLE uploaded_documents (
     agency_submission_id INT NOT NULL,
     uploader_user_id INT NULL,
     uploader_role ENUM('agency','admin') NOT NULL DEFAULT 'agency',
+    batch_token VARCHAR(60) NOT NULL,
     file_name VARCHAR(255) NOT NULL,
     file_path VARCHAR(255) NOT NULL,
-    remarks TEXT NULL,
+    user_remarks TEXT NULL,
+    document_status ENUM('for_review','approved','for_compliance') NOT NULL DEFAULT 'for_review',
+    admin_remarks TEXT NULL,
     uploaded_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    reviewed_at DATETIME NULL,
     CONSTRAINT fk_doc_as FOREIGN KEY (agency_submission_id) REFERENCES agency_submissions(id) ON DELETE CASCADE,
     CONSTRAINT fk_doc_uploader FOREIGN KEY (uploader_user_id) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
