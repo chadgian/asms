@@ -23,10 +23,9 @@ function flash(?string $type = null, ?string $message = null): ?array
         return null;
     }
 
-    $flash = $_SESSION['flash'] ?? null;
+    $item = $_SESSION['flash'] ?? null;
     unset($_SESSION['flash']);
-
-    return $flash;
+    return $item;
 }
 
 function status_badge_class(string $status): string

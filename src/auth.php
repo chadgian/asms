@@ -21,20 +21,9 @@ function require_login(): void
     }
 }
 
-function require_role(array $roles): void
-{
-    require_login();
-    $user = current_user();
-    if (!in_array($user['role'], $roles, true)) {
-        http_response_code(403);
-        echo 'Forbidden';
-        exit;
-    }
-}
-
 function attempt_login(string $username, string $password): bool
 {
-    $stmt = db()->prepare('SELECT * FROM users WHERE username = :username LIMIT 1');
+    $stmt = db()->prepare('SELECT id, name, username, role, password_hash FROM users WHERE username = :username LIMIT 1');
     $stmt->execute(['username' => $username]);
     $user = $stmt->fetch();
 

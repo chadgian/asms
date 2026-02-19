@@ -1,95 +1,68 @@
 # Agency Submission Management System (ASMS)
 
-A lightweight PHP + MySQL web app for managing agency submissions with three account types:
+A PHP + MySQL system for managing document submissions with three roles:
+- **Admin**
+- **Agency**
+- **Viewer (read-only)**
 
-- **Admin**: creates and manages submissions, assigns agencies, reviews uploads, updates status/remarks.
-- **Agency**: sees pending/submitted lists, uploads documents and remarks, receives updates.
-- **Viewer**: read-only access to submissions and agency statuses.
+## Features
+- Username/password login
+- Agency dashboard grouped into:
+  - Not Yet Submitted
+  - Already Submitted
+- Agency upload with remarks
+- Admin submission creation/editing with optional file template
+- Admin agency review with statuses:
+  - Not Yet Submitted
+  - For Review
+  - For Compliance
+  - Approved
+- Notification updates to agencies
+- Problem reporting page
+- Local document storage in `/uploads`
 
-## Tech Stack
+## Required Stack
+- PHP 8.x (XAMPP PHP is fine)
+- MySQL / MariaDB (XAMPP phpMyAdmin is fine)
 
-- PHP 8+
-- MySQL 8+
-- HTML/CSS/JavaScript
-- Local file storage for uploaded documents (`uploads/`)
+## Local Setup (XAMPP)
+1. Copy project folder to:
+   - `C:\xampp\htdocs\asms`
+2. Start **Apache** and **MySQL** in XAMPP Control Panel.
+3. Open phpMyAdmin and create a database (example: `asms`).
+4. Select the database, then import `sql/schema.sql`.
+5. Update DB settings in `config/config.php` if needed.
+6. Open app:
+   - `http://localhost/asms/public`
 
-## Quick Start
-
-1. Create database and import schema:
-   - Open MySQL and run `sql/schema.sql`.
-2. Configure database settings in `config/config.php`.
-3. Serve app from project root:
-
-```bash
-php -S 0.0.0.0:8000 -t public
-```
-
-4. Open: `http://localhost:8000`
-
-## Default Seed Users
-
-From `sql/schema.sql` (all passwords are `password123`):
-
+## Default Accounts
+Password for all accounts: `password123`
 - Admin: `admin`
 - Agency A: `agency_a`
 - Agency B: `agency_b`
 - Viewer: `viewer`
 
-## Important Note (If Login Fails)
+## If You Encounter Import Errors
+- Use a **new empty database** before importing.
+- `schema.sql` already drops/recreates tables to avoid duplicate-column issues.
+- The previous error `#1060 Duplicate column name 'admin'` is resolved by using a clean users table definition and full table recreation in this schema.
 
-If you imported an older schema using `email` accounts, refresh the `users` table by re-running `sql/schema.sql` on a clean database or updating your schema/data to match the new `username`-based login.
+## InfinityFree Deployment Guide
+InfinityFree does not support Node/Vercel-style deployment. Deploy as standard PHP hosting.
 
-## Key Rules Implemented
-
-- Agencies cannot upload when status is **approved**.
-- If a submission is marked **for compliance** and agency uploads new docs, status automatically becomes **for review**.
-- Dashboard for agencies is grouped:
-  - top: not yet submitted
-  - bottom: already submitted
-- Admin can target all agencies or selected agencies.
-
-## Deploying on Vercel (PHP + MySQL)
-
-> Vercel can run PHP through a serverless runtime setup. For production, ensure your MySQL database is publicly reachable or via a secure hosted provider.
-
-1. Install Vercel CLI and login:
-
-```bash
-npm i -g vercel
-vercel login
-```
-
-2. Add a `vercel.json` in project root:
-
-```json
-{
-  "version": 2,
-  "builds": [
-    { "src": "public/index.php", "use": "vercel-php@0.7.3" }
-  ],
-  "routes": [
-    { "src": "/(.*)", "dest": "/public/index.php" }
-  ]
-}
-```
-
-3. Set production environment variables in Vercel Dashboard (or CLI), then map them in `config/config.php` (recommended enhancement):
+1. In InfinityFree control panel, create your MySQL database.
+2. Get DB credentials (DB host, DB name, DB user, DB password).
+3. Import `sql/schema.sql` in InfinityFree phpMyAdmin.
+4. Upload project files via File Manager or FTP to your domain directory (`htdocs`).
+5. Update `config/config.php` values:
    - `DB_HOST`
-   - `DB_PORT`
+   - `DB_PORT` (usually `3306`)
    - `DB_NAME`
    - `DB_USER`
    - `DB_PASS`
+6. Ensure `uploads/` is writable.
+7. Open your site URL and login.
 
-4. Deploy:
-
-```bash
-vercel
-```
-
-5. For production deployment:
-
-```bash
-vercel --prod
-```
-
-6. After deploy, import `sql/schema.sql` to your production MySQL database and verify `uploads/` strategy (local ephemeral storage is not ideal for serverless; consider external object storage for long-term file persistence).
+## Notes for InfinityFree
+- Shared hosting may restrict some PHP settings and filesystem operations.
+- Local-file uploads can work, but for scale you may move files to cloud storage later.
