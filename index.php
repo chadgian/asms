@@ -195,20 +195,47 @@ if($user['role']==='admin' || $isViewer){
 
   if($page==='statistics'){
     $provinces = provinces();
-    $sql = 'SELECT s.id, s.name, s.created_at, u.province, COUNT(a.id) total_assigned, SUM(CASE WHEN a.latest_status <> "not_submitted" THEN 1 ELSE 0 END) submitted '
+
+    // Base totals per submission+province (all assigned agencies).
+    $totalsSql = 'SELECT s.id, s.name, s.created_at, u.province, COUNT(a.id) total_assigned '
       . 'FROM submissions s '
       . 'LEFT JOIN agency_submissions a ON a.submission_id=s.id '
       . 'LEFT JOIN users u ON u.id=a.agency_id '
       . 'GROUP BY s.id, s.name, s.created_at, u.province '
       . 'ORDER BY s.created_at DESC, s.id DESC';
-    $rows = $pdo->query($sql)->fetchAll();
+    $rows = $pdo->query($totalsSql)->fetchAll();
+
+    // Compliance counts: only agencies whose LATEST uploaded batch has ALL docs approved.
+    $approvedSql = 'SELECT s.id submission_id, u.province, COUNT(*) approved_count '
+      . 'FROM agency_submissions a '
+      . 'JOIN submissions s ON s.id=a.submission_id '
+      . 'JOIN users u ON u.id=a.agency_id '
+      . 'JOIN ( '
+      . '  SELECT d.agency_submission_id, MAX(d.uploaded_at) max_uploaded_at '
+      . '  FROM uploaded_documents d '
+      . '  GROUP BY d.agency_submission_id '
+      . ') latest_time ON latest_time.agency_submission_id=a.id '
+      . 'JOIN uploaded_documents latest_doc ON latest_doc.agency_submission_id=a.id '
+      . '  AND latest_doc.uploaded_at=latest_time.max_uploaded_at '
+      . 'GROUP BY s.id, u.province, a.id '
+      . 'HAVING SUM(CASE WHEN latest_doc.document_status <> "approved" THEN 1 ELSE 0 END)=0';
+    $approvedRows = $pdo->query($approvedSql)->fetchAll();
+
+    $approvedMap = [];
+    foreach($approvedRows as $ar){
+      $sid=(int)$ar['submission_id'];
+      $prov=(string)$ar['province'];
+      $approvedMap[$sid][$prov] = ($approvedMap[$sid][$prov] ?? 0) + 1;
+    }
+
     $group=[];
     foreach($rows as $r){
       if(!isset($group[$r['id']])){
         $group[$r['id']] = ['name'=>$r['name'],'created_at'=>$r['created_at'],'data'=>[],'total_submitted'=>0,'total_assigned'=>0];
       }
       if($r['province']){
-        $tot=(int)$r['total_assigned']; $subm=(int)$r['submitted'];
+        $tot=(int)$r['total_assigned'];
+        $subm=(int)($approvedMap[(int)$r['id']][(string)$r['province']] ?? 0);
         $group[$r['id']]['data'][$r['province']] = ['submitted'=>$subm,'total'=>$tot,'pct'=>$tot?round(($subm/$tot)*100,2):0];
         $group[$r['id']]['total_submitted'] += $subm;
         $group[$r['id']]['total_assigned'] += $tot;
