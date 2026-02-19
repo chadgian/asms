@@ -51,11 +51,14 @@ CREATE TABLE agency_submissions (
 CREATE TABLE uploaded_documents (
     id INT AUTO_INCREMENT PRIMARY KEY,
     agency_submission_id INT NOT NULL,
+    uploader_user_id INT NULL,
+    uploader_role ENUM('agency','admin') NOT NULL DEFAULT 'agency',
     file_name VARCHAR(255) NOT NULL,
     file_path VARCHAR(255) NOT NULL,
     remarks TEXT NULL,
     uploaded_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_doc_as FOREIGN KEY (agency_submission_id) REFERENCES agency_submissions(id) ON DELETE CASCADE
+    CONSTRAINT fk_doc_as FOREIGN KEY (agency_submission_id) REFERENCES agency_submissions(id) ON DELETE CASCADE,
+    CONSTRAINT fk_doc_uploader FOREIGN KEY (uploader_user_id) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE notifications (
@@ -78,7 +81,6 @@ CREATE TABLE problem_reports (
     CONSTRAINT fk_problem_agency FOREIGN KEY (agency_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Default accounts (password: password123)
 INSERT INTO users (name, username, password_hash, role) VALUES
 ('System Admin', 'admin', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'admin'),
 ('Agency A', 'agency_a', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'agency'),

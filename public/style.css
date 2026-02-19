@@ -47,3 +47,7 @@ tr:hover td { background:#f8faff; }
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 @media (max-width: 900px){ .two-col{ grid-template-columns:1fr; } .container{ padding:0 12px 30px;} }
+
+.inline-search{display:flex;gap:8px;align-items:center;}
+.inline-search input{min-width:260px;}
+.top-gap{margin-top:12px;}
