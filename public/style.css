@@ -21,3 +21,13 @@ details{border:1px solid #dde6ff;border-radius:10px;padding:8px 10px;margin-bott
 .fade-in{animation:fade .35s ease}
 @keyframes fade{from{opacity:0}to{opacity:1}}@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @media(max-width:900px){.two-col{grid-template-columns:1fr}.container{padding:0 12px 30px}}
+
+.stats-board{border:2px solid #1d2d74;border-radius:10px;overflow:hidden;margin-bottom:14px;background:#fff}
+.stats-title{background:linear-gradient(135deg,#2f46a3,#4a5ec4);color:#fff;text-align:center;padding:10px;font-size:28px;font-weight:700;line-height:1.25}
+.stats-title small{font-size:14px;font-weight:600}
+.stats-grid th,.stats-grid td{text-align:center;border:1px solid #2b2b2b}
+.stats-grid th{background:#c7d2f7;color:#091847;font-size:18px}
+.stats-grid .big{font-size:34px;font-weight:700;margin:6px 0}
+.stats-grid .small{font-size:18px;color:#0f285a;margin-bottom:4px}
+.stats-footer{background:#dce5ff;padding:8px 12px;text-align:right;font-size:20px;font-weight:600;color:#0d235e}
+.stats-footer strong{font-size:40px;color:#00123f;margin-left:8px}

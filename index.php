@@ -194,11 +194,39 @@ if($user['role']==='admin' || $isViewer){
   }
 
   if($page==='statistics'){
-    $tot=$pdo->query("SELECT province, COUNT(*) total FROM users WHERE role='agency' GROUP BY province ORDER BY province")->fetchAll();
-    $sub=$pdo->query("SELECT u.province, COUNT(*) submitted FROM agency_submissions a JOIN users u ON u.id=a.agency_id WHERE a.latest_status <> 'not_submitted' GROUP BY u.province")->fetchAll();
-    $map=[]; foreach($sub as $r){$map[$r['province']] = (int)$r['submitted'];}
+    $provinces = provinces();
+    $sql = 'SELECT s.id, s.name, s.created_at, u.province, COUNT(a.id) total_assigned, SUM(CASE WHEN a.latest_status <> "not_submitted" THEN 1 ELSE 0 END) submitted '
+      . 'FROM submissions s '
+      . 'LEFT JOIN agency_submissions a ON a.submission_id=s.id '
+      . 'LEFT JOIN users u ON u.id=a.agency_id '
+      . 'GROUP BY s.id, s.name, s.created_at, u.province '
+      . 'ORDER BY s.created_at DESC, s.id DESC';
+    $rows = $pdo->query($sql)->fetchAll();
+    $group=[];
+    foreach($rows as $r){
+      if(!isset($group[$r['id']])){
+        $group[$r['id']] = ['name'=>$r['name'],'created_at'=>$r['created_at'],'data'=>[],'total_submitted'=>0,'total_assigned'=>0];
+      }
+      if($r['province']){
+        $tot=(int)$r['total_assigned']; $subm=(int)$r['submitted'];
+        $group[$r['id']]['data'][$r['province']] = ['submitted'=>$subm,'total'=>$tot,'pct'=>$tot?round(($subm/$tot)*100,2):0];
+        $group[$r['id']]['total_submitted'] += $subm;
+        $group[$r['id']]['total_assigned'] += $tot;
+      }
+    }
+
     render_header('Statistics'); ?>
-    <section class="card"><h2>Submission Statistics by Province</h2><?php if(!$tot): ?><p class="muted">No submission yet.</p><?php else: ?><table><thead><tr><th>Province</th><th>Submitted</th><th>Total Assigned</th><th>Completion</th></tr></thead><tbody><?php foreach($tot as $r): $submitted=$map[$r['province']] ?? 0; $total=(int)$r['total']; $pct=$total?round(($submitted/$total)*100,2):0; ?><tr><td><?=h($r['province']?:'-')?></td><td><?= $submitted ?></td><td><?= $total ?></td><td><?= $pct ?>% (<?= $submitted ?>/<?= $total ?>)</td></tr><?php endforeach; ?></tbody></table><?php endif; ?></section>
+    <section class="card"><h2>Statistics by Submission</h2><?php if(!$group): ?><p class="muted">no submissions yet</p><?php else: ?>
+      <?php foreach($group as $g): $overall=$g['total_assigned']?round(($g['total_submitted']/$g['total_assigned'])*100,2):0; ?>
+        <div class="stats-board">
+          <div class="stats-title"><?= h($g['name']) ?><br><small>As of <?= h(date('F d, Y', strtotime($g['created_at'] ?: 'now'))) ?></small></div>
+          <table class="stats-grid"><thead><tr><?php foreach($provinces as $p): ?><th><?= h($p==='Negros Occidental'?'Neg. Occ.':$p) ?></th><?php endforeach; ?></tr></thead>
+            <tbody><tr><?php foreach($provinces as $p): $d=$g['data'][$p] ?? ['submitted'=>0,'total'=>0,'pct'=>0]; ?><td><div class="big"><?= $d['submitted'] ?>/<?= $d['total'] ?></div><div class="small"><?= $d['pct'] ?>%</div></td><?php endforeach; ?></tr></tbody>
+          </table>
+          <div class="stats-footer">Total Percentage of Compliance: <strong><?= $overall ?>%</strong></div>
+        </div>
+      <?php endforeach; ?>
+    <?php endif; ?></section>
     <?php render_footer(); exit;
   }
 

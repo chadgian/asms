@@ -130,3 +130,30 @@ INSERT INTO users (name, username, password_hash, role, province) VALUES
 ('Viewer Guimaras', 'viewer_guimaras', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'viewer', 'Guimaras'),
 ('Viewer Iloilo', 'viewer_iloilo', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'viewer', 'Iloilo'),
 ('Viewer Negros Occidental', 'viewer_negocc', '$2y$12$1lOFW5Q55J8TauHJSrumY.8rSPOs/bCAZlnDkdumVDb74tTbR26Ye', 'viewer', 'Negros Occidental');
+
+-- Sample submissions for testing
+INSERT INTO submissions (name, deadline, details, created_by, created_at, updated_at) VALUES
+('Submission of HR-GAIns Users Enrollment Data', '2026-03-31', 'Submit updated enrollment data per agency.', (SELECT id FROM users WHERE username='admin' LIMIT 1), NOW(), NOW()),
+('Quarterly Compliance Report', '2026-04-15', 'Submit quarterly compliance narrative and supporting documents.', (SELECT id FROM users WHERE username='admin' LIMIT 1), NOW(), NOW()),
+('Inventory and Asset Utilization', '2026-05-10', 'Submit latest inventory and asset utilization templates.', (SELECT id FROM users WHERE username='admin' LIMIT 1), NOW(), NOW());
+
+-- Assign all agencies to all sample submissions with varied sample statuses
+INSERT INTO agency_submissions (submission_id, agency_id, latest_status, submitted_at, updated_at)
+SELECT s.id, u.id,
+CASE
+  WHEN s.name = 'Submission of HR-GAIns Users Enrollment Data' AND u.province IN ('Aklan','Antique','Capiz','Guimaras') THEN 'approved'
+  WHEN s.name = 'Submission of HR-GAIns Users Enrollment Data' AND u.province = 'Iloilo' THEN 'for_review'
+  WHEN s.name = 'Submission of HR-GAIns Users Enrollment Data' AND u.province = 'Negros Occidental' THEN 'for_compliance'
+  WHEN s.name = 'Quarterly Compliance Report' AND u.province IN ('Aklan','Capiz') THEN 'for_review'
+  WHEN s.name = 'Quarterly Compliance Report' AND u.province IN ('Antique','Guimaras') THEN 'approved'
+  WHEN s.name = 'Quarterly Compliance Report' AND u.province IN ('Iloilo','Negros Occidental') THEN 'for_compliance'
+  ELSE 'not_submitted'
+END,
+CASE
+  WHEN s.name = 'Inventory and Asset Utilization' THEN NULL
+  ELSE NOW()
+END,
+NOW()
+FROM submissions s
+JOIN users u ON u.role='agency'
+WHERE s.name IN ('Submission of HR-GAIns Users Enrollment Data','Quarterly Compliance Report','Inventory and Asset Utilization');
