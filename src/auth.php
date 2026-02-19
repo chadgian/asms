@@ -1,0 +1,52 @@
+<?php
+
+declare(strict_types=1);
+
+require_once __DIR__ . '/db.php';
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+function current_user(): ?array
+{
+    return $_SESSION['user'] ?? null;
+}
+
+function require_login(): void
+{
+    if (!current_user()) {
+        header('Location: index.php?page=login');
+        exit;
+    }
+}
+
+function attempt_login(string $username, string $password): bool
+{
+    $stmt = db()->prepare('SELECT id, name, username, role, password_hash FROM users WHERE username = :username LIMIT 1');
+    $stmt->execute(['username' => $username]);
+    $user = $stmt->fetch();
+
+    if (!$user || !password_verify($password, $user['password_hash'])) {
+        return false;
+    }
+
+    $_SESSION['user'] = [
+        'id' => (int) $user['id'],
+        'name' => $user['name'],
+        'username' => $user['username'],
+        'role' => $user['role'],
+    ];
+
+    return true;
+}
+
+function logout(): void
+{
+    $_SESSION = [];
+    if (ini_get('session.use_cookies')) {
+        $params = session_get_cookie_params();
+        setcookie(session_name(), '', time() - 42000, $params['path'], $params['domain'], $params['secure'], $params['httponly']);
+    }
+    session_destroy();
+}
