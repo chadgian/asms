@@ -25,11 +25,14 @@ CREATE TABLE users (
 CREATE TABLE submissions (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
+    parent_submission_id INT NULL,
+    hierarchy_path VARCHAR(255) NULL,
     deadline DATE NOT NULL,
     details TEXT NULL,
     created_by INT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_submission_parent FOREIGN KEY (parent_submission_id) REFERENCES submissions(id) ON DELETE SET NULL,
     CONSTRAINT fk_submission_creator FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
