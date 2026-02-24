@@ -18,6 +18,8 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:10px;bor
 details{border:1px solid #dde6ff;border-radius:10px;padding:8px 10px;margin-bottom:10px}summary{cursor:pointer;font-weight:700}
 .agency-modal{width:min(900px,92vw);border:none;border-radius:14px;padding:18px}.agency-list{display:grid;grid-template-columns:1fr;gap:8px;max-height:420px;overflow:auto;margin-top:10px}.agency-opt{display:flex;gap:10px;align-items:flex-start;border:1px solid #dbe4ff;padding:10px;border-radius:10px}.agency-opt input{margin-top:4px}.agency-opt small{display:block;color:#6077b2}
 .selected-box{background:#f7f9ff;border:1px solid #dbe4ff;border-radius:10px;padding:10px}.selected-box ul{margin:0;padding-left:18px;max-height:120px;overflow:auto}
+.hierarchy-level{display:flex;gap:8px;align-items:center}.hierarchy-level input{flex:1}
+
 .fade-in{animation:fade .35s ease}
 @keyframes fade{from{opacity:0}to{opacity:1}}@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @media(max-width:900px){.two-col{grid-template-columns:1fr}.container{padding:0 12px 30px}}

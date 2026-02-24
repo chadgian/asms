@@ -47,18 +47,36 @@ function syncSelectedAgencies(){
 }
 document.querySelectorAll('.agency-opt input').forEach(c=>c.addEventListener('change',syncSelectedAgencies)); syncSelectedAgencies();
 
-const parentSubmission=document.getElementById('parent_submission_id');const hierarchyPathInput=document.getElementById('hierarchy_path');const hierarchyPreview=document.getElementById('hierarchy-preview');
+const useHierarchy=document.getElementById('use_hierarchy');
+const hierarchyConfig=document.getElementById('hierarchy-config');
+const parentSubmission=document.getElementById('parent_submission_id');
+const hierarchyLevels=document.getElementById('hierarchy-levels');
+const addHierarchyLevel=document.getElementById('add-hierarchy-level');
+const hierarchyPreview=document.getElementById('hierarchy-preview');
+function hierarchyInput(value=''){
+  return `<div class="hierarchy-level"><input name="hierarchy_levels[]" placeholder="Category / Folder name" value="${value.replaceAll('"','&quot;')}"><button type="button" class="btn btn-edit remove-hierarchy-level">Remove</button></div>`;
+}
+function syncHierarchyVisibility(){
+  if(!useHierarchy||!hierarchyConfig)return;
+  hierarchyConfig.style.display=useHierarchy.checked?'grid':'none';
+}
 function syncHierarchyPreview(){
   if(!hierarchyPreview)return;
-  const parentLabel=parentSubmission?parentSubmission.options[parentSubmission.selectedIndex]?.textContent.trim():'';
-  const manualPath=hierarchyPathInput?hierarchyPathInput.value.trim():'';
-  let prefix='';
-  if(parentSubmission && parentSubmission.value){prefix=parentLabel;}
-  else if(manualPath){prefix=manualPath.split('/').map(x=>x.trim()).filter(Boolean).join(' / ');}
-  hierarchyPreview.textContent=prefix?`Path Preview: ${prefix}`:'Path Preview: Top-level submission';
+  if(useHierarchy && !useHierarchy.checked){hierarchyPreview.textContent='Path Preview: Top-level submission';return;}
+  const parentLabel=parentSubmission&&parentSubmission.value?parentSubmission.options[parentSubmission.selectedIndex]?.textContent.trim():'';
+  const levels=[...document.querySelectorAll('input[name="hierarchy_levels[]"]')].map(i=>i.value.trim()).filter(Boolean);
+  const parts=[];
+  if(parentLabel)parts.push(parentLabel);
+  parts.push(...levels);
+  hierarchyPreview.textContent=parts.length?`Path Preview: ${parts.join(' / ')}`:'Path Preview: Top-level submission';
+}
+if(useHierarchy){useHierarchy.addEventListener('change',()=>{syncHierarchyVisibility();syncHierarchyPreview();});syncHierarchyVisibility();}
+if(addHierarchyLevel && hierarchyLevels){addHierarchyLevel.addEventListener('click',()=>{hierarchyLevels.insertAdjacentHTML('beforeend',hierarchyInput(''));syncHierarchyPreview();});}
+if(hierarchyLevels){
+  hierarchyLevels.addEventListener('click',e=>{if(e.target.classList.contains('remove-hierarchy-level')){e.target.parentElement.remove();syncHierarchyPreview();}});
+  hierarchyLevels.addEventListener('input',e=>{if(e.target.name==='hierarchy_levels[]')syncHierarchyPreview();});
 }
 if(parentSubmission){parentSubmission.addEventListener('change',syncHierarchyPreview);}
-if(hierarchyPathInput){hierarchyPathInput.addEventListener('input',syncHierarchyPreview);}
 syncHierarchyPreview();
 
 const roleSel=document.getElementById('role');const sec=document.getElementById('sector-wrap');if(roleSel&&sec){const s=()=>sec.style.display=roleSel.value==='viewer'?'none':'grid';roleSel.addEventListener('change',s);s();}
@@ -166,8 +184,14 @@ if($user['role']==='admin' || $isViewer){
 
   if(!$isViewer && $page==='admin_submission_save' && $_SERVER['REQUEST_METHOD']==='POST'){
     $id=(int)($_POST['id']??0);$name=trim($_POST['name']??'');$deadline=trim($_POST['deadline']??'');$details=trim($_POST['details']??'');$scopeType=$_POST['scope']??'all';$agencyIds=$_POST['agency_ids']??[];
-    $parentId=(int)($_POST['parent_submission_id']??0);$manualPath=trim($_POST['hierarchy_path']??'');$manualPath=trim(preg_replace('/\s*\/\s*/','/',$manualPath),'/');
-    if($parentId>0){$chk=$pdo->prepare('SELECT id,name,hierarchy_path FROM submissions WHERE id=:id');$chk->execute(['id'=>$parentId]);$parent=$chk->fetch();if(!$parent || ($id>0 && (int)$parent['id']===$id)){flash('error','Invalid parent submission selected.');header('Location:index.php?page=admin_submission_form'.($id>0?'&id='.$id:''));exit;}$parentPathParts=[];if(!empty($parent['hierarchy_path'])){$parentPathParts=array_filter(array_map('trim',explode('/',(string)$parent['hierarchy_path'])));} $parentPathParts[]=(string)$parent['name'];$hierarchyPath=implode('/',$parentPathParts);} else {$hierarchyPath=$manualPath!==''?$manualPath:null;}
+    $useHierarchy=isset($_POST['use_hierarchy']) && $_POST['use_hierarchy']==='1';
+    $parentId=$useHierarchy?(int)($_POST['parent_submission_id']??0):0;
+    $levelsRaw=$_POST['hierarchy_levels']??[]; if(!is_array($levelsRaw)){$levelsRaw=[];}
+    $levels=[]; foreach($levelsRaw as $lv){$clean=trim((string)$lv); if($clean!==''){$levels[]=$clean;}}
+    $hierarchyPath=null;
+    if($useHierarchy){
+      if($parentId>0){$chk=$pdo->prepare('SELECT id,name,hierarchy_path FROM submissions WHERE id=:id');$chk->execute(['id'=>$parentId]);$parent=$chk->fetch();if(!$parent || ($id>0 && (int)$parent['id']===$id)){flash('error','Invalid parent submission selected.');header('Location:index.php?page=admin_submission_form'.($id>0?'&id='.$id:''));exit;}$parentPathParts=[];if(!empty($parent['hierarchy_path'])){$parentPathParts=array_filter(array_map('trim',explode('/',(string)$parent['hierarchy_path'])));} $parentPathParts[]=(string)$parent['name'];$hierarchyPath=implode('/',$parentPathParts);} elseif($levels){$hierarchyPath=implode('/',$levels);}
+    } else {$parentId=0;}
     if($id>0){$pdo->prepare('UPDATE submissions SET name=:n,deadline=:d,details=:x,parent_submission_id=:p,hierarchy_path=:h,updated_at=NOW() WHERE id=:i')->execute(['n'=>$name,'d'=>$deadline,'x'=>$details,'p'=>$parentId?:null,'h'=>$hierarchyPath,'i'=>$id]);$pdo->prepare('DELETE FROM agency_submissions WHERE submission_id=:i')->execute(['i'=>$id]);}
     else {$pdo->prepare('INSERT INTO submissions (name,parent_submission_id,hierarchy_path,deadline,details,created_by,created_at,updated_at) VALUES (:n,:p,:h,:d,:x,:c,NOW(),NOW())')->execute(['n'=>$name,'p'=>$parentId?:null,'h'=>$hierarchyPath,'d'=>$deadline,'x'=>$details,'c'=>$user['id']]);$id=(int)$pdo->lastInsertId();}
     if(isset($_FILES['file_templates']['name']) && is_array($_FILES['file_templates']['name'])){ $ins=$pdo->prepare('INSERT INTO submission_templates (submission_id,file_name,file_path,uploaded_at) VALUES (:s,:f,:p,NOW())'); foreach($_FILES['file_templates']['name'] as $i=>$n){ if(($_FILES['file_templates']['error'][$i]??1)!==UPLOAD_ERR_OK) continue; $orig=basename((string)$n); $stored=uniqid('tpl_',true).'_'.preg_replace('/[^a-zA-Z0-9._-]/','_',$orig); if(move_uploaded_file($_FILES['file_templates']['tmp_name'][$i],UPLOAD_DIR.'/'.$stored)) $ins->execute(['s'=>$id,'f'=>$orig,'p'=>$stored]); }}
@@ -189,8 +213,10 @@ if($user['role']==='admin' || $isViewer){
     $sql="SELECT id,name,province,sector FROM users WHERE role='agency'"; if($scope){$sql.=' AND province=:p';$st=$pdo->prepare($sql.' ORDER BY name');$st->execute(['p'=>$scope]);} else {$st=$pdo->prepare($sql.' ORDER BY name');$st->execute();} $agencies=$st->fetchAll();
     $parents=$pdo->query('SELECT id,name,hierarchy_path FROM submissions ORDER BY name')->fetchAll();
     $selectedScope=$selected?'selected':'all';
+    $hierarchyLevels=[]; if(!empty($s['hierarchy_path']) && empty($s['parent_submission_id'])){$hierarchyLevels=array_filter(array_map('trim',explode('/',(string)$s['hierarchy_path'])));}
+    $useHierarchyDefault=!empty($s['parent_submission_id']) || !empty($s['hierarchy_path']);
     render_header('Submission Form'); ?>
-    <section class="card"><h2><?= $id?'Edit':'Add' ?> Submission</h2><form method="post" action="index.php?page=admin_submission_save" enctype="multipart/form-data" class="form-grid two-col"><input type="hidden" name="id" value="<?= (int)$s['id'] ?>"><label>Name<input name="name" value="<?=h($s['name'])?>" required></label><label>Deadline<input type="date" name="deadline" value="<?=h($s['deadline'])?>" required></label><label>Parent Submission<select name="parent_submission_id" id="parent_submission_id"><option value="0">None (Top-level)</option><?php foreach($parents as $parent): if((int)$parent['id']===(int)$s['id']) continue; $parts=[]; if(!empty($parent['hierarchy_path'])){$parts=array_filter(array_map('trim',explode('/',(string)$parent['hierarchy_path'])));} $parts[]=(string)$parent['name']; $full=implode(' / ',$parts); ?><option value="<?= (int)$parent['id'] ?>" <?= (int)($s['parent_submission_id']??0)===(int)$parent['id']?'selected':'' ?>><?=h($full)?></option><?php endforeach; ?></select></label><label>Hierarchy Path (optional)<input name="hierarchy_path" id="hierarchy_path" value="<?=h((string)($s['hierarchy_path']??''))?>" placeholder="e.g. PRIME-HRM ERs/Learning and Development"></label><div class="span-2 muted" id="hierarchy-preview">Path Preview: Top-level submission</div><label class="span-2">Details<textarea name="details" rows="4"><?=h($s['details']??'')?></textarea></label><label class="span-2">File Templates (multiple)<input type="file" name="file_templates[]" multiple></label><label>Scope<select name="scope" id="scope"><option value="all" <?= $selectedScope==='all'?'selected':'' ?>>All Agencies</option><option value="selected" <?= $selectedScope==='selected'?'selected':'' ?>>Selected Agencies</option></select></label><div id="selected-count" class="muted">Selected: <?=count($selected)?></div><div class="span-2 selected-box" id="selected-agencies-box"><h4>Selected Agencies</h4><ul id="selected-agencies-list"></ul><button type="button" class="btn btn-edit" id="open-agency-edit">Edit Selected Agency</button></div><button>Save Submission</button>
+    <section class="card"><h2><?= $id?'Edit':'Add' ?> Submission</h2><form method="post" action="index.php?page=admin_submission_save" enctype="multipart/form-data" class="form-grid two-col"><input type="hidden" name="id" value="<?= (int)$s['id'] ?>"><label>Name<input name="name" value="<?=h($s['name'])?>" required></label><label>Deadline<input type="date" name="deadline" value="<?=h($s['deadline'])?>" required></label><label class="span-2"><input type="checkbox" id="use_hierarchy" name="use_hierarchy" value="1" <?= $useHierarchyDefault?'checked':'' ?>> Enable hierarchy organization (optional)</label><div class="span-2 form-grid two-col" id="hierarchy-config"><label>Parent Submission<select name="parent_submission_id" id="parent_submission_id"><option value="0">None (Start fresh)</option><?php foreach($parents as $parent): if((int)$parent['id']===(int)$s['id']) continue; $parts=[]; if(!empty($parent['hierarchy_path'])){$parts=array_filter(array_map('trim',explode('/',(string)$parent['hierarchy_path'])));} $parts[]=(string)$parent['name']; $full=implode(' / ',$parts); ?><option value="<?= (int)$parent['id'] ?>" <?= (int)($s['parent_submission_id']??0)===(int)$parent['id']?'selected':'' ?>><?=h($full)?></option><?php endforeach; ?></select></label><div><label>Hierarchy Levels (multiple)</label><div id="hierarchy-levels" class="form-grid"><?php if($hierarchyLevels): foreach($hierarchyLevels as $lv): ?><div class="hierarchy-level"><input name="hierarchy_levels[]" value="<?=h($lv)?>" placeholder="Category / Folder name"><button type="button" class="btn btn-edit remove-hierarchy-level">Remove</button></div><?php endforeach; else: ?><div class="hierarchy-level"><input name="hierarchy_levels[]" placeholder="Category / Folder name"><button type="button" class="btn btn-edit remove-hierarchy-level">Remove</button></div><?php endif; ?></div><button type="button" class="btn btn-edit" id="add-hierarchy-level">+ Add Another Level</button></div></div><div class="span-2 muted" id="hierarchy-preview">Path Preview: Top-level submission</div><label class="span-2">Details<textarea name="details" rows="4"><?=h($s['details']??'')?></textarea></label><label class="span-2">File Templates (multiple)<input type="file" name="file_templates[]" multiple></label><label>Scope<select name="scope" id="scope"><option value="all" <?= $selectedScope==='all'?'selected':'' ?>>All Agencies</option><option value="selected" <?= $selectedScope==='selected'?'selected':'' ?>>Selected Agencies</option></select></label><div id="selected-count" class="muted">Selected: <?=count($selected)?></div><div class="span-2 selected-box" id="selected-agencies-box"><h4>Selected Agencies</h4><ul id="selected-agencies-list"></ul><button type="button" class="btn btn-edit" id="open-agency-edit">Edit Selected Agency</button></div><button>Save Submission</button>
     <dialog id="agency-modal" class="agency-modal"><div class="row"><h3>Select Agencies</h3><button type="button" class="btn btn-edit" id="close-agency-modal">Close</button></div><input id="agency-search" placeholder="Search agency name/province"><div class="agency-list line-list"><?php foreach($agencies as $a): ?><label class="agency-opt"><input type="checkbox" name="agency_ids[]" value="<?= (int)$a['id'] ?>" <?= in_array((int)$a['id'],array_map('intval',$selected),true)?'checked':'' ?> data-label="<?=h($a['name'])?> (<?=h($a['province']?:'-')?>)"> <span><strong><?=h($a['name'])?></strong><small><?=h($a['province']?:'-')?> • <?=h($a['sector']?:'-')?></small></span></label><?php endforeach; ?></div></dialog>
     </form></section>
     <?php render_footer(); exit;
