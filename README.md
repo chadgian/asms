@@ -19,6 +19,7 @@ Modern PHP + MySQL management system for Admin, Agency, and Viewer users.
 - Different statistics layout per submission (dashboard-style matrix with total compliance).
 - Realtime as-you-type search in major lists/tables.
 - Buttons and action labels standardized for clarity (Download for downloadable items).
+- Submission hierarchy support: admin can create nested submission categories (parent + path) for organized tracking.
 
 ## XAMPP Setup
 1. Copy project to `C:\xampp\htdocs\asms`.
